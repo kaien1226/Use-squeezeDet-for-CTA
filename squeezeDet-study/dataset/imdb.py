@@ -110,11 +110,16 @@ class imdb(object):
       bbox_per_batch: scaled bounding boxes. Shape: batch_size x object_num x 
           [cx, cy, w, h]
     """
+    print "read_batch"
     mc = self.mc
-
+    print 'shuffle', shuffle
+    print 'self._cur_idx:', self._cur_idx
+    print 'mc.BATCH_SIZE:', mc.BATCH_SIZE
+    print 'self._image_idx:', self.image_idx
     if shuffle:
       if self._cur_idx + mc.BATCH_SIZE >= len(self._image_idx):
         self._shuffle_image_idx()
+      print 'self._image_idx:', self.image_idx
       batch_idx = self._perm_idx[self._cur_idx:self._cur_idx+mc.BATCH_SIZE]
       self._cur_idx += mc.BATCH_SIZE
     else:
@@ -131,6 +136,7 @@ class imdb(object):
     bbox_per_batch  = []
     delta_per_batch = []
     aidx_per_batch  = []
+    print "mc.DEBUG_MODE:", mc.DEBUG_MODE
     if mc.DEBUG_MODE:
       avg_ious = 0.
       num_objects = 0.
@@ -141,13 +147,21 @@ class imdb(object):
     for idx in batch_idx:
       # load the image
       im = cv2.imread(self._image_path_at(idx)).astype(np.float32, copy=False)
+      print "name:", self._image_path_at(idx)
+      #print "mc.BGR_MEANS:", mc.BGR_MEANS
       im -= mc.BGR_MEANS
       orig_h, orig_w, _ = [float(v) for v in im.shape]
+      print "orig_h:", orig_h, "orig_w:", orig_w
 
       # load annotations
       label_per_batch.append([b[4] for b in self._rois[idx][:]])
+      #print "self._rois:", self._rois
+      print "self._rois[idx]:", self._rois[idx][:]
+      print "label_per_batch.append:", label_per_batch.append 
       gt_bbox = np.array([[b[0], b[1], b[2], b[3]] for b in self._rois[idx][:]])
+      print "gt_bbox:", gt_bbox
 
+      print "mc.DATA_AUGMENTATION:", mc.DATA_AUGMENTATION
       if mc.DATA_AUGMENTATION:
         assert mc.DRIFT_X >= 0 and mc.DRIFT_Y > 0, \
             'mc.DRIFT_X and mc.DRIFT_Y must be >= 0'
@@ -160,6 +174,8 @@ class imdb(object):
 
           dy = np.random.randint(-mc.DRIFT_Y, min(mc.DRIFT_Y+1, max_drift_y))
           dx = np.random.randint(-mc.DRIFT_X, min(mc.DRIFT_X+1, max_drift_x))
+          print 'dy:', dy
+          print 'dx:', dx          
 
           # shift bbox
           gt_bbox[:, 0] = gt_bbox[:, 0] - dx
@@ -191,11 +207,17 @@ class imdb(object):
       gt_bbox[:, 0::2] = gt_bbox[:, 0::2]*x_scale
       gt_bbox[:, 1::2] = gt_bbox[:, 1::2]*y_scale
       bbox_per_batch.append(gt_bbox)
+      print 'gt_bbox', gt_bbox
+      print 'bbox_per_batch.append', bbox_per_batch.append
+      #cv2.rectangle(image, (Xmin, Ymin), (Xmax, Ymax), (0,255,255), 1)
+      #cv2.imshow("img", image)  
+      #cv2.waitKey(0)
 
       aidx_per_image, delta_per_image = [], []
       aidx_set = set()
       for i in range(len(gt_bbox)):
         overlaps = batch_iou(mc.ANCHOR_BOX, gt_bbox[i])
+        print 'overlaps', overlaps
 
         aidx = len(mc.ANCHOR_BOX)
         for ov_idx in np.argsort(overlaps)[::-1]:

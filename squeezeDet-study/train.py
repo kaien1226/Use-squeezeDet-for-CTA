@@ -263,7 +263,7 @@ def train():
     run_options = tf.RunOptions(timeout_in_ms=60000)
 
     # try: 
-    for step in xrange(FLAGS.max_steps):
+    for step in xrange(FLAGS.max_steps):#max_step = 1000000
       if coord.should_stop():
         sess.run(model.FIFOQueue.close(cancel_pending_enqueues=True))
         coord.request_stop()
@@ -272,7 +272,7 @@ def train():
 
       start_time = time.time()
 
-      if step % FLAGS.summary_step == 0:
+      if step % FLAGS.summary_step == 0: #summary_step = 10
         feed_dict, image_per_batch, label_per_batch, bbox_per_batch = \
             _load_data(load_to_placeholder=False)
         op_list = [
