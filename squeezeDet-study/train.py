@@ -18,14 +18,14 @@ import tensorflow as tf
 import threading
 
 from config import *
-from dataset import pascal_voc, kitti
+from dataset import pascal_voc, kitti, cityscapes
 from utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
 from nets import *
 
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('dataset', 'KITTI',
-                           """Currently only support KITTI dataset.""")
+                           """Currently only support KITTI & cityscapes dataset.""")
 tf.app.flags.DEFINE_string('data_path', '', """Root directory of data""")
 tf.app.flags.DEFINE_string('image_set', 'train',
                            """ Can be train, trainval, val, or test""")
@@ -101,8 +101,8 @@ def _viz_prediction_result(model, images, bboxes, labels, batch_det_bbox,
 
 def train():
   """Train SqueezeDet model"""
-  assert FLAGS.dataset == 'KITTI', \
-      'Currently only support KITTI dataset'
+  assert FLAGS.dataset == 'KITTI' or FLAGS.dataset== 'cityscapes', \
+      'Currently only support KITTI & cityscapes dataset'
 
   os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
 
@@ -122,7 +122,10 @@ def train():
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = ResNet50ConvDet(mc)
     elif FLAGS.net == 'squeezeDet':
-      mc = kitti_squeezeDet_config()
+      if FLAGS.dataset== 'cityscapes'
+        mc = cityscapes_squeezeDet_config()
+      elif FLAGS.dataset== 'KITTI'
+        mc = kitti_squeezeDet_config()
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = SqueezeDet(mc)
@@ -132,7 +135,7 @@ def train():
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = SqueezeDetPlus(mc)
 
-    imdb = kitti(FLAGS.image_set, FLAGS.data_path, mc)
+    imdb = cityscapes(FLAGS.image_set, FLAGS.data_path, mc)
 
     # save model size, flops, activations by layers
     with open(os.path.join(FLAGS.train_dir, 'model_metrics.txt'), 'w') as f:
