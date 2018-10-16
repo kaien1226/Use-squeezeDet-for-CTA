@@ -50,6 +50,11 @@ def batch_iou(boxes, box):
       0
   )
   inter = lr*tb
+  print 'boxes', boxes
+  print 'box', box
+  print 'lr:', lr
+  print 'tb:', tb
+  print 'inter:', inter
   union = boxes[:,2]*boxes[:,3] + box[2]*box[3] - inter
   return inter/union
 

@@ -26,13 +26,13 @@ class cityscapes(imdb):
     # the image width and height
     self._rois = self._load_cityscapes_annotation()
 
-    print 'image_set:', self._image_set
-    print 'data_root_path:', self._data_root_path
-    print 'image_path:', self._label_path
-    print 'classes:', self._classes
-    print 'class_to_idx:', self._class_to_idx
-    print 'image_idx:', self._image_idx
-    print 'rois:', self._rois
+   # print 'image_set:', self._image_set
+   # print 'data_root_path:', self._data_root_path
+   # print 'image_path:', self._label_path
+   # print 'classes:', self._classes
+   # print 'class_to_idx:', self._class_to_idx
+   # print 'image_idx:', self._image_idx
+   # print 'rois:', self._rois
     
     ## batch reader ##
     self._perm_idx = None
