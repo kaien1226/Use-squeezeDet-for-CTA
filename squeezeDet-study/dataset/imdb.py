@@ -217,7 +217,12 @@ class imdb(object):
         # print 'overlaps', overlaps
 
         aidx = len(mc.ANCHOR_BOX)
+        # print 'aidx:', aidx
+        # print 'aidx_set:', aidx_set
+        print 'argsort:', np.argsort(overlaps)[::-1]
         for ov_idx in np.argsort(overlaps)[::-1]:
+          #print 'aidx:', aidx
+          print 'aidx_set:', aidx_set          
           if overlaps[ov_idx] <= 0:
             if mc.DEBUG_MODE:
               min_iou = min(overlaps[ov_idx], min_iou)
@@ -227,12 +232,14 @@ class imdb(object):
           if ov_idx not in aidx_set:
             aidx_set.add(ov_idx)
             aidx = ov_idx
+            print 'aidx:', aidx
+            print 'ov_idx:', ov_idx
             if mc.DEBUG_MODE:
               max_iou = max(overlaps[ov_idx], max_iou)
               min_iou = min(overlaps[ov_idx], min_iou)
               avg_ious += overlaps[ov_idx]
               num_objects += 1
-            break
+            break            
 
         if aidx == len(mc.ANCHOR_BOX): 
           # even the largeset available overlap is 0, thus, choose one with the

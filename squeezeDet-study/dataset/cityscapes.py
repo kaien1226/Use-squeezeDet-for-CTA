@@ -11,11 +11,12 @@ from dataset.imdb import imdb
 from utils.util import bbox_transform_inv, batch_iou
 
 class cityscapes(imdb):
-  def __init__(self, image_set, data_path, mc):
-    imdb.__init__(self, 'kitti_'+image_set, mc)
+  def __init__(self, image_set, data_path, idx_path, mc):
+    imdb.__init__(self, 'cityscapes_'+image_set, mc)
     self._image_set = image_set
     self._data_root_path = data_path
-    self._image_path = os.path.join(self._data_root_path, 'leftImg8bit', 'train')
+    self._idx_path = idx_path
+    self._image_path = os.path.join(self._data_root_path, 'leftImg8bit')
     self._label_path = os.path.join(self._data_root_path, 'label')
     self._classes = self.mc.CLASS_NAMES
     self._class_to_idx = dict(zip(self.classes, xrange(self.num_classes)))
@@ -44,7 +45,7 @@ class cityscapes(imdb):
 
   def _load_image_set_idx(self):
     image_set_file = os.path.join(
-        self._data_root_path, self._image_set+'.txt')
+        self._idx_path, self._image_set+'.txt')
     assert os.path.exists(image_set_file), \
         'File does not exist: {}'.format(image_set_file)
     
@@ -99,7 +100,8 @@ class cityscapes(imdb):
             'Invalid bounding box y-coord ymin {} or ymax {} at {}.txt' \
                 .format(ymin, ymax, index)
         x, y, w, h = bbox_transform_inv([xmin, ymin, xmax, ymax])
-        bboxes.append([x, y, w, h, cls])
+        if w > 7 and h > 7:  
+          bboxes.append([x, y, w, h, cls])
 
       idx2annotation[index] = bboxes
 
